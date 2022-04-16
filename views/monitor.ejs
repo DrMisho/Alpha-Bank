@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+  <%- include('layouts/header'); -%>
+  
+<%- include('layouts/navbar'); -%>
+  <!-- Page Header -->
+
+  <header class="masthead" style="background-image: url('img/monitor-page.webp')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-15 mx-auto">
+          <div class="page-heading">
+            <h1>Monitor</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <body>
+  
+
+    </audio>
+    <div class="container">
+      <div class="row col-lg-25 mx-auto">
+        
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Governorate</th>
+                <th scope="col">Location</th>
+                <th scope="col">Status</th>
+                <th scope="col">Info</th>
+                <th scope="col">Last Threat</th>
+              </tr>
+            </thead>
+            <tbody>
+          <% for (var i = 0; i < ESPData.length; i++) { %>
+            <tr>
+              <th scope="row"><%= ESPData[i].Governorate %></th>
+              <td><%= ESPData[i].LOC %></td>
+              <td id= "<%= ESPData[i].LOC %>"></td>
+              <td id="info <%= ESPData[i].LOC %>"></td>
+              <td><%= ESPData[i].Log %>></td>
+            </tr>
+            <br>
+            <br>
+          <% } %>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <button class="invisible" id="Btn1" >Try it</button>
+    <button class="invisible" id="Btn2" >Try it</button>
+  </body>
+
+  <%- include('layouts/footer'); -%>
+
+  <%- include('layouts/scripts'); -%>
+  <script>
+    var audio = new Audio('Alarm.mp3');
+
+    const btn1 = document.getElementById("Btn1");
+    const btn2 = document.getElementById("Btn2");
+
+    btn1.addEventListener("click", function() 
+      {
+        
+        playPromise = audio.play();
+        if (playPromise !== undefined) 
+        {
+          playPromise.then( function() 
+          {
+            // Automatic playback started!
+            console.log(playPromise)
+          }).catch(function(error) {
+            // Automatic playback failed.
+            console.log('field')
+            console.log(playPromise)
+            // Show a UI element to let the user manually start playback.
+            });
+
+      }
+    });
+
+    btn2.addEventListener("click", function() 
+      {
+        
+        playPromise = audio.pause();
+        if (playPromise !== undefined) 
+        {
+          playPromise.then( function() 
+          {
+            // Automatic playback started!
+            console.log(playPromise)
+          }).catch(function(error) {
+            // Automatic playback failed.
+            console.log('field')
+            console.log(playPromise)
+            // Show a UI element to let the user manually start playback.
+            });
+
+      }
+    });
+    btn2.click();
+    if (!!window.EventSource) {
+
+      var source = new EventSource('/getSensor')
+      
+      source.addEventListener('message', function(e) {
+        var i = 0
+        var s = 0;
+        var username = "<%=name%>"
+        console.log(username)
+        while(JSON.parse(e.data).loc[i])
+        {
+          let name = JSON.parse(e.data).loc[i]
+          let nameInfo = "info "+ JSON.parse(e.data).loc[i]
+          if((JSON.parse(e.data).gov[i] == username || username == 'any'))
+          {
+            if(JSON.parse(e.data).danger[i] > 0)
+            {
+              document.getElementById(name).className = "text-danger"
+              document.getElementById(name).innerHTML = "Danger"
+              btn1.click();
+              if(JSON.parse(e.data).danger[i] == 1)
+              {
+                document.getElementById(nameInfo).innerHTML = "Day Hack"
+              }
+              else if(JSON.parse(e.data).danger[i] == 2)
+              {
+                document.getElementById(nameInfo).innerHTML = "Night Hack"
+              }
+              else if(JSON.parse(e.data).danger[i] == 3)
+              {
+                document.getElementById(nameInfo).innerHTML = "Fire (Call Station)"
+              }
+              else if(JSON.parse(e.data).danger[i] == 4)
+              {
+                document.getElementById(nameInfo).innerHTML = "The money room is in danger"
+              }
+            }
+            else if (JSON.parse(e.data).danger[i] == 0)
+            {
+              document.getElementById(name).className = "text-success"
+              document.getElementById(name).innerHTML = "Safe"
+              document.getElementById(nameInfo).innerHTML = "No Action"
+            }
+            s = s + JSON.parse(e.data).danger[i];
+          }
+          i++;
+        }
+        if (s == 0)
+        {
+          btn2.click();
+        }
+
+        
+      }, false)
+  
+  
+      source.addEventListener('error', function(e) {
+        const id_state = document.getElementById('state')
+        if (e.eventPhase == EventSource.CLOSED)
+          source.close()
+        if (e.target.readyState == EventSource.CLOSED) {
+          id_state.innerHTML = "Disconnected"
+        }
+        else if (e.target.readyState == EventSource.CONNECTING) {
+          id_state.innerHTML = "Connecting..."
+        }
+      }, false)
+    } else {
+      console.log("Your browser doesn't support SSE")
+    }
+    </script>
+
+
+</html>
