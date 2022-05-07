@@ -14,13 +14,14 @@ const ejs = require('ejs');
 const mongoose = require('mongoose');
 const expressSession = require('express-session');
 
+
+
 //------------------ Middelware Modules -----------
 
 const authESPMiddleware = require('./middleware/authESPMiddleware');
 const redirectIfAuthenticatedMiddleware = require('./middleware/redirectIfAuthenticatedMiddleware')
 const redirectIfNotAuthenticatedMiddleware = require('./middleware/redirectIfNotAuthenticatedMiddleware')
 const redirectIfNotAdminMiddleware = require('./middleware/redirectIfNotAdminMiddleware')
-const make = require('./middleware/make')
 
 //----------------- Controller Modules ------------
 
@@ -32,6 +33,8 @@ const logoutController = require('./controllers/logoutController')
 const createUserController = require('./controllers/createUserController')
 const monitorContoller = require('./controllers/monitorContoller')
 
+//---------------- Models --------------------------
+const ESP = require('./models/esp');
 
 //---------------- Configuration -------------------
 
@@ -42,8 +45,10 @@ mongoose.connect('mongodb+srv://Alpha-Bank:LnjwowGcQ7pqTC1H@cluster0.shqua.mongo
 app.set('view engine','ejs')
 
 
+
+
 //---------------- Public Middleware ---------------
-app.use(bodyparser.urlencoded({extended:true}));
+app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
 app.use(express.static('public'));
 app.use(expressSession({
@@ -57,15 +62,13 @@ global.loggedIn = null;
 global.isAdmin = false;
 global.username = null;
 global.role = 4;
-global.LOCDanger = [];
-global.isDanger = [];
-global.GOVDanger = [];
+
 app.use("*", (req, res, next) => {
     loggedIn = req.session.userId;
     
     next();
 }); 
-app.use(make);
+
 
 
 //-------------- ESP HTTP Request -------------------
@@ -98,12 +101,26 @@ app.get('/getSensor',function(req, res) {
     getSensor(res)
   })
 
-function getSensor(res) {
-  res.write(`data: ${JSON.stringify({gov : global.GOVDanger ,loc: global.LOCDanger, danger: global.isDanger})} \n\n`)
-  setTimeout(() => getSensor(res), 1000)
-    
-}
+async function getSensor (res) {
+  var gov = []
+  var loc = []
+  var danger = []
+  var error, esp = await ESP.find({})
+  if(error)
+  {
+    console.log(error);
+  }
+  esp.forEach((e)=>{
+    gov.push(e.Governorate);
+    loc.push(e.LOC);
+    danger.push(e.Status);
+  })
 
+  res.write(`data: ${JSON.stringify({gov : gov ,loc: loc, danger: danger})} \n\n`)
+
+  setTimeout(() => getSensor(res), 500)
+  
+}
 const port = process.env.PORT || 3000
 
 app.listen(port, ()=>{

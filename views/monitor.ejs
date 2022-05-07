@@ -5,6 +5,7 @@
   
 <%- include('layouts/navbar'); -%>
   <!-- Page Header -->
+  
 
   <header class="masthead" style="background-image: url('img/monitor-page.webp')">
     <div class="overlay"></div>
@@ -12,7 +13,7 @@
       <div class="row">
         <div class="col-lg-8 col-md-15 mx-auto">
           <div class="page-heading">
-            <h1>Monitor</h1>
+            <h1 class="tex">Monitor</h1>
           </div>
         </div>
       </div>
@@ -21,29 +22,37 @@
 
   <body>
   
-
-    </audio>
     <div class="container">
       <div class="row col-lg-25 mx-auto">
         
           <table class="table table-striped table-hover">
             <thead>
               <tr>
-                <th scope="col">Governorate</th>
-                <th scope="col">Location</th>
-                <th scope="col">Status</th>
-                <th scope="col">Info</th>
-                <th scope="col">Last Threat</th>
+                <td><img class="imge" src="img/gov.jpg" alt=""></td>
+                <td><img class="imge" src="img/hh.webp" alt=""></td>
+                <td><img class="imge" src="img/status.webp" alt=""></td>
+                <td><img class="imge" src="img/infoo.jpg" alt=""></td>
+                <td><img class="imge" src="img/lt.jpg" alt=""></td>
+                <td><img class="imge" src="img/cam.jpg" alt=""></td>
+              </tr>
+              <tr>
+                <th class="head tex" scope="col">Governorate</th>
+                <th class="head tex" scope="col">Location</th>
+                <th class="head tex" scope="col">Status</th>
+                <th class="head tex" scope="col">Info</th>
+                <th class="head tex" scope="col">Last Threat</th>
+                <th class="head tex" scope="col">Camera Monitor</th>
               </tr>
             </thead>
             <tbody>
           <% for (var i = 0; i < ESPData.length; i++) { %>
             <tr>
-              <th scope="row"><%= ESPData[i].Governorate %></th>
+              <td scope="row"><%= ESPData[i].Governorate %></td>
               <td><%= ESPData[i].LOC %></td>
               <td id= "<%= ESPData[i].LOC %>"></td>
               <td id="info <%= ESPData[i].LOC %>"></td>
-              <td><%= ESPData[i].Log %>></td>
+              <td><%= date[i] %></td>
+              <td><button class="btn-primary bt tex">go to <%= ESPData[i].LOC %> </button></td>
             </tr>
             <br>
             <br>
